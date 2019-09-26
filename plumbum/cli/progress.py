@@ -22,13 +22,15 @@ class ProgressBase(six.ABC):
     :param clear: Clear the progress bar afterwards, if applicable.
     """
 
-    def __init__(self,
-                 iterator=None,
-                 length=None,
-                 timer=True,
-                 body=False,
-                 has_output=False,
-                 clear=True):
+    def __init__(
+        self,
+        iterator=None,
+        length=None,
+        timer=True,
+        body=False,
+        has_output=False,
+        clear=True,
+    ):
         if length is None:
             length = len(iterator)
         elif iterator is None:
@@ -93,8 +95,11 @@ class ProgressBase(six.ABC):
         if self.value < 1:
             return None, None
         elapsed_time = datetime.datetime.now() - self._start_time
-        time_each = (elapsed_time.days * 24 * 60 * 60 + elapsed_time.seconds +
-                     elapsed_time.microseconds / 1000000.0) / self.value
+        time_each = (
+            elapsed_time.days * 24 * 60 * 60
+            + elapsed_time.seconds
+            + elapsed_time.microseconds / 1000000.0
+        ) / self.value
         time_remaining = time_each * (self.length - self.value)
         return elapsed_time, datetime.timedelta(0, time_remaining, 0)
 
@@ -103,11 +108,10 @@ class ProgressBase(six.ABC):
         if self.value < 1:
             return "Starting...                         "
         else:
-            elapsed_time, time_remaining = list(
-                map(str, self.time_remaining()))
+            elapsed_time, time_remaining = list(map(str, self.time_remaining()))
             return "{0} completed, {1} remaining".format(
-                elapsed_time.split('.')[0],
-                time_remaining.split('.')[0])
+                elapsed_time.split(".")[0], time_remaining.split(".")[0]
+            )
 
     @abstractmethod
     def done(self):
@@ -134,7 +138,7 @@ class Progress(ProgressBase):
         self.value = self.length
         self.display()
         if self.clear and not self.has_output:
-            print("\r", len(str(self)) * " ", "\r", end='', sep='')
+            print("\r", len(str(self)) * " ", "\r", end="", sep="")
         else:
             print()
 
@@ -145,36 +149,40 @@ class Progress(ProgressBase):
             return "0/0 complete"
 
         percent = max(self.value, 0) / self.length
-        ending = ' ' + (self.str_time_remaining()
-                        if self.timer else '{0} of {1} complete'.format(
-                            self.value, self.length))
+        ending = " " + (
+            self.str_time_remaining()
+            if self.timer
+            else "{0} of {1} complete".format(self.value, self.length)
+        )
         if width - len(ending) < 10 or self.has_output:
             self.width = 0
             if self.timer:
                 return "{0:.0%} complete: {1}".format(
-                    percent, self.str_time_remaining())
+                    percent, self.str_time_remaining()
+                )
             else:
                 return "{0:.0%} complete".format(percent)
 
         else:
             self.width = width - len(ending) - 2 - 1
             nstars = int(percent * self.width)
-            pbar = '[' + '*' * nstars + ' ' * (
-                self.width - nstars) + ']' + ending
+            pbar = "[" + "*" * nstars + " " * (self.width - nstars) + "]" + ending
 
-        str_percent = ' {0:.0%} '.format(percent)
+        str_percent = " {0:.0%} ".format(percent)
 
-        return pbar[:self.width // 2 -
-                    2] + str_percent + pbar[self.width // 2 +
-                                            len(str_percent) - 2:]
+        return (
+            pbar[: self.width // 2 - 2]
+            + str_percent
+            + pbar[self.width // 2 + len(str_percent) - 2 :]
+        )
 
     def display(self):
         disptxt = str(self)
         if self.width == 0 or self.has_output:
             print(disptxt)
         else:
-            print("\r", end='')
-            print(disptxt, end='')
+            print("\r", end="")
+            print(disptxt, end="")
             sys.stdout.flush()
 
 
@@ -198,6 +206,7 @@ class ProgressIPy(ProgressBase):  # pragma: no cover
 
     def start(self):
         from IPython.display import display  # type: ignore
+
         display(self._box)
         super(ProgressIPy, self).start()
 
@@ -256,10 +265,11 @@ ProgressAuto.register(Progress)
 
 def main():
     import time
+
     tst = Progress.range(20)
     for i in tst:
         time.sleep(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

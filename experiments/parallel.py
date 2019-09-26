@@ -1,6 +1,7 @@
 from plumbum.commands.base import BaseCommand
 from plumbum.commands.processes import run_proc, CommandNotFound, ProcessExecutionError
 
+
 def make_concurrent(self, rhs):
     if not isinstance(rhs, BaseCommand):
         raise TypeError("rhs must be an instance of BaseCommand")
@@ -16,7 +17,9 @@ def make_concurrent(self, rhs):
     else:
         return ConcurrentCommand(self, rhs)
 
+
 BaseCommand.__and__ = make_concurrent
+
 
 class ConcurrentPopen(object):
     def __init__(self, procs):
@@ -26,9 +29,11 @@ class ConcurrentPopen(object):
         self.stderr = None
         self.custom_encoding = None
         self.returncode = None
+
     @property
     def argv(self):
         return [getattr(proc, "argv", []) for proc in self.procs]
+
     def poll(self):
         if self.returncode is not None:
             return self.returncode
@@ -46,6 +51,7 @@ class ConcurrentPopen(object):
         for proc in self.procs:
             proc.wait()
         return self.poll()
+
     def communicate(self, input=None):
         if input:
             raise ValueError("Cannot pass input to ConcurrentPopen.communicate")
@@ -53,21 +59,25 @@ class ConcurrentPopen(object):
         self.wait()
         return tuple(zip(*out_err_tuples))
 
+
 class ConcurrentCommand(BaseCommand):
     def __init__(self, *commands):
         self.commands = list(commands)
+
     def formulate(self, level=0, args=()):
         form = ["("]
         for cmd in self.commands:
             form.extend(cmd.formulate(level, args))
             form.append("&")
         return form + [")"]
+
     def popen(self, *args, **kwargs):
         return ConcurrentPopen([cmd[args].popen(**kwargs) for cmd in self.commands])
+
     def __getitem__(self, args):
         """Creates a bound-command with the given arguments"""
         if not isinstance(args, (tuple, list)):
-            args = [args, ]
+            args = [args]
         if not args:
             return self
         else:
@@ -77,10 +87,13 @@ class ConcurrentCommand(BaseCommand):
 class Cluster(object):
     def __init__(self, *machines):
         self.machines = list(machines)
+
     def __enter__(self):
         return self
+
     def __exit__(self, t, v, tb):
         self.close()
+
     def close(self):
         for mach in self.machines:
             mach.close()
@@ -88,22 +101,30 @@ class Cluster(object):
 
     def add_machine(self, machine):
         self.machines.append(machine)
+
     def __iter__(self):
         return iter(self.machines)
+
     def filter(self, pred):
         return self.__class__(filter(pred, self))
+
     def which(self, progname):
         return [mach.which(progname) for mach in self]
+
     def list_processes(self):
         return [mach.list_processes() for mach in self]
+
     def pgrep(self, pattern):
         return [mach.pgrep(pattern) for mach in self]
+
     def path(self, *parts):
         return [mach.path(*parts) for mach in self]
+
     def __getitem__(self, progname):
         if not isinstance(progname, str):
-            raise TypeError("progname must be a string, not %r" % (type(progname,)))
+            raise TypeError("progname must be a string, not %r" % (type(progname)))
         return ConcurrentCommand(*(mach[progname] for mach in self))
+
     def __contains__(self, cmd):
         try:
             self[cmd]
@@ -119,31 +140,39 @@ class Cluster(object):
     def session(self):
         return ClusterSession(*(mach.session() for mach in self))
 
-class ClusterSession(object):
 
+class ClusterSession(object):
     def __init__(self, *sessions):
         self.sessions = sessions
+
     def __iter__(self):
         return iter(self.sessions)
+
     def __enter__(self):
         return self
+
     def __exit__(self, t, v, tb):
         self.close()
+
     def __del__(self):
         try:
             self.close()
         except Exception:
             pass
+
     def alive(self):
         """Returns ``True`` if the underlying shells are all alive, ``False`` otherwise"""
         return all(session.alive for session in self)
+
     def close(self):
         """Closes (terminates) all underlying shell sessions"""
         for session in self.sessions:
             session.close()
         del self.sessions[:]
+
     def popen(self, cmd):
         return ConcurrentPopen([session.popen(cmd) for session in self])
+
     def run(self, cmd, retcode=None):
         return run_proc(self.popen(cmd), retcode)
 
@@ -151,6 +180,7 @@ class ClusterSession(object):
 if __name__ == "__main__":
     from plumbum import local
     from plumbum.cmd import ls, date, sleep
+
     c = ls & date & sleep[1]
     print(c())
 
@@ -165,7 +195,6 @@ if __name__ == "__main__":
     clst = Cluster(local, local, local)
     print(clst["ls"]())
 
-
     # This works fine
     print(local.session().run("echo $$"))
 
@@ -173,11 +202,4 @@ if __name__ == "__main__":
     ret, stdout, stderr = clst.session().run("echo $$")
     print(ret)
     ret = [int(pid) for pid in stdout]
-    assert(len(set(ret))==3)
-
-
-
-
-
-
-
+    assert len(set(ret)) == 3

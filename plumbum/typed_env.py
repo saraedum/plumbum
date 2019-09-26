@@ -38,7 +38,6 @@ class TypedEnv(MutableMapping):
     __slots__ = ["_env", "_defined_keys"]
 
     class _BaseVar(object):
-
         def __init__(self, name, default=NO_DEFAULT):
             self.names = tuple(name) if isinstance(name, (tuple, list)) else (name,)
             self.name = self.names[0]
@@ -64,7 +63,6 @@ class TypedEnv(MutableMapping):
         pass
 
     class Bool(_BaseVar):
-
         def convert(self, s):
             s = s.lower()
             if s not in ("yes", "no", "true", "false", "1", "0"):
@@ -81,7 +79,6 @@ class TypedEnv(MutableMapping):
         convert = staticmethod(float)
 
     class CSV(_BaseVar):
-
         def __init__(self, name, default=NO_DEFAULT, type=str, separator=","):
             super(TypedEnv.CSV, self).__init__(name, default=default)
             self.type = type
@@ -97,7 +94,11 @@ class TypedEnv(MutableMapping):
 
     def __init__(self, env=os.environ):
         self._env = env
-        self._defined_keys = set(k for (k, v) in inspect.getmembers(self.__class__) if isinstance(v, self._BaseVar))
+        self._defined_keys = set(
+            k
+            for (k, v) in inspect.getmembers(self.__class__)
+            if isinstance(v, self._BaseVar)
+        )
 
     def __iter__(self):
         return iter(dir(self))

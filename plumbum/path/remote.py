@@ -38,15 +38,20 @@ class RemotePath(Path):
     def __new__(cls, remote, *parts):
         if not parts:
             raise TypeError("At least one path part is required (none given)")
-        windows = (remote.uname.lower() == "windows")
+        windows = remote.uname.lower() == "windows"
         normed = []
 
-        parts = tuple(map(str, parts))  # force the paths into string, so subscription works properly
+        parts = tuple(
+            map(str, parts)
+        )  # force the paths into string, so subscription works properly
         # Simple skip if path is absolute
         if parts[0] and parts[0][0] not in ("/", "\\"):
-            cwd = (remote._cwd if hasattr(remote, '_cwd') else
-                   remote._session.run("pwd")[1].strip())
-            parts = (cwd, ) + parts
+            cwd = (
+                remote._cwd
+                if hasattr(remote, "_cwd")
+                else remote._session.run("pwd")[1].strip()
+            )
+            parts = (cwd,) + parts
 
         for p in parts:
             if windows:
@@ -98,16 +103,16 @@ class RemotePath(Path):
     @property  # type: ignore
     @_setdoc(Path)
     def suffix(self):
-        return '.' + self.name.rsplit('.', 1)[1]
+        return "." + self.name.rsplit(".", 1)[1]
 
     @property  # type: ignore
     @_setdoc(Path)
     def suffixes(self):
         name = self.name
         exts = []
-        while '.' in name:
-            name, ext = name.rsplit('.', 1)
-            exts.append('.' + ext)
+        while "." in name:
+            name, ext = name.rsplit(".", 1)
+            exts.append("." + ext)
         return list(reversed(exts))
 
     @property  # type: ignore
@@ -179,18 +184,19 @@ class RemotePath(Path):
 
     @_setdoc(Path)
     def with_suffix(self, suffix, depth=1):
-        if (suffix and not suffix.startswith('.') or suffix == '.'):
+        if suffix and not suffix.startswith(".") or suffix == ".":
             raise ValueError("Invalid suffix %r" % (suffix))
         name = self.name
-        depth = len(self.suffixes) if depth is None else min(
-            depth, len(self.suffixes))
+        depth = len(self.suffixes) if depth is None else min(depth, len(self.suffixes))
         for i in range(depth):
-            name, ext = name.rsplit('.', 1)
+            name, ext = name.rsplit(".", 1)
         return self.__class__(self.remote, self.dirname) / (name + suffix)
 
     @_setdoc(Path)
     def glob(self, pattern):
-        fn = lambda pat: [RemotePath(self.remote, m) for m in self.remote._path_glob(self, pat)]
+        fn = lambda pat: [
+            RemotePath(self.remote, m) for m in self.remote._path_glob(self, pat)
+        ]
         return self._glob(pattern, fn)
 
     @_setdoc(Path)
@@ -209,7 +215,8 @@ class RemotePath(Path):
         elif not isinstance(dst, six.string_types):
             raise TypeError(
                 "dst must be a string or a RemotePath (to the same remote machine), "
-                "got %r" % (dst, ))
+                "got %r" % (dst,)
+            )
         self.remote._path_move(self, dst)
 
     @_setdoc(Path)
@@ -220,7 +227,8 @@ class RemotePath(Path):
         elif not isinstance(dst, six.string_types):
             raise TypeError(
                 "dst must be a string or a RemotePath (to the same remote machine), "
-                "got %r" % (dst, ))
+                "got %r" % (dst,)
+            )
         if override:
             if isinstance(dst, six.string_types):
                 dst = RemotePath(self.remote, dst)
@@ -247,8 +255,8 @@ class RemotePath(Path):
                 if "File exists" in ex.stderr:
                     if not exist_ok:
                         raise OSError(
-                            errno.EEXIST, "File exists (on remote end)",
-                            str(self))
+                            errno.EEXIST, "File exists (on remote end)", str(self)
+                        )
                 else:
                     raise
 
@@ -272,8 +280,8 @@ class RemotePath(Path):
     @_setdoc(Path)
     def chown(self, owner=None, group=None, recursive=None):
         self.remote._path_chown(
-            self, owner, group,
-            self.is_dir() if recursive is None else recursive)
+            self, owner, group, self.is_dir() if recursive is None else recursive
+        )
 
     @_setdoc(Path)
     def chmod(self, mode):
@@ -285,7 +293,7 @@ class RemotePath(Path):
         res = self.remote._path_stat(self)
         if res is None:
             return False
-        mask = res.st_mode & 0x1ff
+        mask = res.st_mode & 0x1FF
         return ((mask >> 6) & mode) or ((mask >> 3) & mode)
 
     @_setdoc(Path)
@@ -296,7 +304,8 @@ class RemotePath(Path):
         elif not isinstance(dst, six.string_types):
             raise TypeError(
                 "dst must be a string or a RemotePath (to the same remote machine), "
-                "got %r" % (dst, ))
+                "got %r" % (dst,)
+            )
         self.remote._path_link(self, dst, False)
 
     @_setdoc(Path)
@@ -307,7 +316,8 @@ class RemotePath(Path):
         elif not isinstance(dst, six.string_types):
             raise TypeError(
                 "dst must be a string or a RemotePath (to the same remote machine), "
-                "got %r" % (dst, ))
+                "got %r" % (dst,)
+            )
         self.remote._path_link(self, dst, True)
 
     def open(self, mode="r", bufsize=-1):
@@ -321,27 +331,29 @@ class RemotePath(Path):
         else:
             raise NotImplementedError(
                 "RemotePath.open only works for ParamikoMachine-associated "
-                "paths for now")
+                "paths for now"
+            )
 
     @_setdoc(Path)
-    def as_uri(self, scheme='ssh'):
-        return '{0}://{1}{2}'.format(scheme, self.remote._fqhost,
-                                     urllib.pathname2url(str(self)))
+    def as_uri(self, scheme="ssh"):
+        return "{0}://{1}{2}".format(
+            scheme, self.remote._fqhost, urllib.pathname2url(str(self))
+        )
 
     @property  # type: ignore
     @_setdoc(Path)
     def stem(self):
-        return self.name.rsplit('.')[0]
+        return self.name.rsplit(".")[0]
 
     @property  # type: ignore
     @_setdoc(Path)
     def root(self):
-        return '/'
+        return "/"
 
     @property  # type: ignore
     @_setdoc(Path)
     def drive(self):
-        return ''
+        return ""
 
 
 class RemoteWorkdir(RemotePath):
@@ -349,8 +361,8 @@ class RemoteWorkdir(RemotePath):
 
     def __new__(cls, remote):
         self = super(RemoteWorkdir, cls).__new__(
-            cls, remote,
-            remote._session.run("pwd")[1].strip())
+            cls, remote, remote._session.run("pwd")[1].strip()
+        )
         return self
 
     def __hash__(self):
@@ -358,8 +370,8 @@ class RemoteWorkdir(RemotePath):
 
     def chdir(self, newdir):
         """Changes the current working directory to the given one"""
-        self.remote._session.run("cd %s" % (shquote(newdir), ))
-        if hasattr(self.remote, '_cwd'):
+        self.remote._session.run("cd %s" % (shquote(newdir),))
+        if hasattr(self.remote, "_cwd"):
             del self.remote._cwd
         return self.__class__(self.remote)
 

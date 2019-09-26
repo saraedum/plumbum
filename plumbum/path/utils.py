@@ -18,7 +18,7 @@ def delete(*paths):
         elif hasattr(p, "__iter__"):
             delete(*p)
         else:
-            raise TypeError("Cannot delete %r" % (p, ))
+            raise TypeError("Cannot delete %r" % (p,))
 
 
 def _move(src, dst):
@@ -43,8 +43,8 @@ def move(src, dst):
             dst.mkdir()
         elif not dst.is_dir():
             raise ValueError(
-                "When using multiple sources, dst %r must be a directory" %
-                (dst, ))
+                "When using multiple sources, dst %r must be a directory" % (dst,)
+            )
         for src2 in src:
             move(src2, dst)
         return dst
@@ -81,8 +81,8 @@ def copy(src, dst):
             dst.mkdir()
         elif not dst.is_dir():
             raise ValueError(
-                "When using multiple sources, dst %r must be a directory" %
-                (dst, ))
+                "When using multiple sources, dst %r must be a directory" % (dst,)
+            )
         for src2 in src:
             copy(src2, dst)
         return dst
@@ -110,7 +110,7 @@ def copy(src, dst):
 def gui_open(filename):
     """This selects the proper gui open function. This can
        also be achieved with webbrowser, but that is not supported."""
-    if (hasattr(os, "startfile")):
+    if hasattr(os, "startfile"):
         os.startfile(filename)
     else:
-        local.get('xdg-open', 'open')(filename)
+        local.get("xdg-open", "open")(filename)

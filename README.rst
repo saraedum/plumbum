@@ -11,7 +11,7 @@
    :target: https://coveralls.io/github/tomerfiliba/plumbum?branch=master
    :alt: Coverage Status
 .. image:: https://img.shields.io/pypi/v/plumbum.svg
-   :target: https://pypi.python.org/pypi/plumbum/ 
+   :target: https://pypi.python.org/pypi/plumbum/
    :alt: PyPI Status
 .. image:: https://img.shields.io/pypi/pyversions/plumbum.svg
    :target: https://pypi.python.org/pypi/plumbum/
@@ -33,16 +33,16 @@
 Plumbum: Shell Combinators
 ==========================
 
-Ever wished the compactness of shell scripts be put into a **real** programming language? 
-Say hello to *Plumbum Shell Combinators*. Plumbum (Latin for *lead*, which was used to create 
-pipes back in the day) is a small yet feature-rich library for shell script-like programs in Python. 
-The motto of the library is **"Never write shell scripts again"**, and thus it attempts to mimic 
-the **shell syntax** ("shell combinators") where it makes sense, while keeping it all **Pythonic 
+Ever wished the compactness of shell scripts be put into a **real** programming language?
+Say hello to *Plumbum Shell Combinators*. Plumbum (Latin for *lead*, which was used to create
+pipes back in the day) is a small yet feature-rich library for shell script-like programs in Python.
+The motto of the library is **"Never write shell scripts again"**, and thus it attempts to mimic
+the **shell syntax** ("shell combinators") where it makes sense, while keeping it all **Pythonic
 and cross-platform**.
 
-Apart from shell-like syntax and handy shortcuts, the library provides local and remote command 
-execution (over SSH), local and remote file-system paths, easy working-directory and environment 
-manipulation, and a programmatic Command-Line Interface (CLI) application toolkit. 
+Apart from shell-like syntax and handy shortcuts, the library provides local and remote command
+execution (over SSH), local and remote file-system paths, easy working-directory and environment
+manipulation, and a programmatic Command-Line Interface (CLI) application toolkit.
 Now let's see some code!
 
 *This is only a teaser; the full documentation can be found at*
@@ -66,11 +66,11 @@ Basics
     >>> notepad()                                   # Notepad window pops up
     u''                                             # Notepad window is closed by user, command returns
 
-Instead of writing ``xxx = local["xxx"]`` for every program you wish to use, you can 
+Instead of writing ``xxx = local["xxx"]`` for every program you wish to use, you can
 also ``import`` commands
 
 .. code-block:: python
-    
+
     >>> from plumbum.cmd import grep, wc, cat, head
     >>> grep
     LocalCommand(<LocalPath /bin/grep>)
@@ -79,7 +79,7 @@ Piping
 ******
 
 .. code-block:: python
-    
+
     >>> chain = ls["-a"] | grep["-v", "\\.py"] | wc["-l"]
     >>> print chain
     /bin/ls -a | /bin/grep -v '\.py' | /usr/bin/wc -l
@@ -102,7 +102,7 @@ Working-directory manipulation
 ******************************
 
 .. code-block:: python
-    
+
     >>> local.cwd
     <Workdir /home/tomer/workspace/plumbum>
     >>> with local.cwd(local.cwd / "docs"):
@@ -127,7 +127,7 @@ Command nesting
 ***************
 
 .. code-block:: python
-    
+
     >>> from plumbum.cmd import sudo
     >>> print sudo[ifconfig["-a"]]
     /usr/bin/sudo /sbin/ifconfig -a
@@ -138,7 +138,7 @@ Command nesting
 Remote commands (over SSH)
 **************************
 
-Supports `openSSH <http://www.openssh.org/>`_-compatible clients, 
+Supports `openSSH <http://www.openssh.org/>`_-compatible clients,
 `PuTTY <http://www.chiark.greenend.org.uk/~sgtatham/putty/>`_ (on Windows)
 and `Paramiko <https://github.com/paramiko/paramiko/>`_ (a pure-Python implementation of SSH2)
 

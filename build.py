@@ -7,9 +7,10 @@ try:
 except ImportError:
     twine = None
 
+
 class BuildProject(cli.Application):
-    'Build and optionally upload. For help, see https://packaging.python.org/en/latest/distributing/#uploading-your-project-to-pypi'
-    upload = cli.Flag("upload", help = "If given, the artifacts will be uploaded to PyPI")
+    "Build and optionally upload. For help, see https://packaging.python.org/en/latest/distributing/#uploading-your-project-to-pypi"
+    upload = cli.Flag("upload", help="If given, the artifacts will be uploaded to PyPI")
 
     def main(self):
         delete(local.cwd // "*.egg-info", "build", "dist")
@@ -22,7 +23,7 @@ class BuildProject(cli.Application):
             if twine is None:
                 print("Twine not installed, cannot securely upload. Install twine.")
             else:
-                twine['upload', 'dist/*tar.gz', 'dist/*.whl'] & FG
+                twine["upload", "dist/*tar.gz", "dist/*.whl"] & FG
         else:
             print("Built. To upload, run:")
             print("  twine upload dist/*tar.gz dist/*.whl")
